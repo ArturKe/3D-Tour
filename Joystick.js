@@ -55,8 +55,8 @@ class Joystick {
         }
         
         console.log('binding Mouse')
-        console.log(`.${this.classStick}`)
-        console.log(document.querySelector(`.${this.classStick}`))
+        // console.log(`.${this.classStick}`)
+        // console.log(document.querySelector(`.${this.classStick}`))
 
         document.querySelector(`.${this.classStick}`).addEventListener('mousedown',(e)=>{
             mouseState.startX = e.clientX
@@ -66,16 +66,16 @@ class Joystick {
             mouseState.startOffsetY = e.layerY
             mouseState.curentPosY = +document.querySelector(`.${this.classStick}`).style.top.slice(0,2)
 
-            console.log("Pressed")
+            console.log("Pressed Mouse")
             console.log(mouseState.StartX)
-            console.log(e)
+            // console.log(e)
             // this.x++
             this.styleChange(e,true)
             this.isPressed = true
         })
 
         document.querySelector(`.${this.classStick}`).addEventListener('mouseup',(e)=>{
-            console.log("Released")
+            console.log("Released Mouse")
             this.isPressed = false
             this.resetStickPosition()
             this.x = 0
@@ -119,7 +119,7 @@ class Joystick {
 
         
         console.log('binding Touch')
-        console.log(`.${this.classStick}`)
+        // console.log(`.${this.classStick}`)
 
         document.querySelector(`.${this.classStick}`).addEventListener('touchstart',(e)=>{
 
@@ -148,8 +148,9 @@ class Joystick {
                 mouseState.curentPosY = +document.querySelector(`.${this.classStick}`).style.top.slice(0,2)
 
                 this.styleChange(e,true)
+                console.log("Pressed Touch")
     
-                // console.log("Pressed")
+                
                 // console.log(e)
                 // for(let i=0; i < 3; i++){
                 //     console.log('/-------------------------/')
@@ -170,7 +171,7 @@ class Joystick {
         document.querySelector(`.${this.classStick}`).addEventListener('touchend',(e)=>{
             
             if(e.target.classList.value === this.classStick){
-                console.log("Released")
+                console.log("Released Touch")
                 this.isPressed = false
                 this.resetStickPosition()
                 this.x = 0
@@ -200,7 +201,6 @@ class Joystick {
     styleChange(event,state){
         if(state){
             event.target.style.background = this.isActiveStyleColor
-            console.log(event.target)
             
         } else {
             event.target.style.background = this.joystickStyleColor
