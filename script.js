@@ -36,7 +36,7 @@ console.log(forwardVector)
 
 const geometry = new THREE.BoxGeometry( 1, 1, 1 );
 geometry.translate( 0, 0.5, 0 );
-const material = new THREE.MeshStandardMaterial({color: new THREE.Color('grey')});
+const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
 
 for ( let i = 0; i < 500; i ++ ) {
 
@@ -66,13 +66,13 @@ scene.add( floor );
 floor.position.y = -0.6;
 
 //Grid
-const grid = new THREE.GridHelper(500,10)
+const grid = new THREE.GridHelper(500,100)
 scene.add(grid)
 // grid.position.y = -0.6
 
   
   camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  camera.position.set(180, 40, 250);
+  camera.position.set(180, 2, 250);
 //   camera.lookAt(160, 0, 20)
   scene.add(camera)
   
@@ -110,10 +110,12 @@ function update(){
     camera.position.x += Math.sin(camera.rotation.y) * +joy.get().y/2;
     camera.position.z += Math.cos(camera.rotation.y) * +joy.get().y/2;
 
-    camera.position.x += Math.sin(camera.rotation.y + Math.PI / 2) * +joy.get().x/2;
-    camera.position.z += Math.cos(camera.rotation.y + Math.PI / 2) * +joy.get().x/2;
+    camera.position.x += Math.sin(camera.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
+    camera.position.z += Math.cos(camera.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
     
-    // camera.rotation.y -= +joy.get().x/100;
+    camera.rotation.y -= +joy.get().x/200;
+    //camera.rotation.y -= +joyLeft.get().x/100;
+    camera.position.y -= +joyLeft.get().y/5;
 
     //-------------------------------------------------------------------------Test
 
