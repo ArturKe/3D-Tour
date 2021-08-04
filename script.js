@@ -1,5 +1,5 @@
 console.log('Hello')
-let scene, renderer, cameras, camera, helper, axisVector, startVector, targetVector, distance = 0, angle = 0;
+let scene, renderer, cameras, camera, helper, axisVector, startVector, targetVector, distance = 0, angle = 0, group, box;
 
 const joyLeft = new Joystick('body',{ left: 20, bottom: 20})
 const joy = new Joystick('body',{ right: 20, bottom: 20})
@@ -41,17 +41,26 @@ const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
 for ( let i = 0; i < 500; i ++ ) {
 
         const mesh = new THREE.Mesh( geometry, material );
-        mesh.position.x = Math.random() * 500 - 1;
+        mesh.position.x = Math.random() * 400-200;
         mesh.position.y = 0;
-        mesh.position.z = Math.random() * 500 - 1;
-        mesh.scale.x = Math.random() * 10 + 2;;
-        mesh.scale.y = Math.random() * 30 + 5;
-        mesh.scale.z = 5;
+        mesh.position.z = Math.random() * 400-200;
+        mesh.scale.x = Math.random() * 10 + 2;
+        mesh.scale.y = Math.random() * 2 + 0.1;
+        mesh.scale.z = Math.random() * 5 + 3;
         mesh.updateMatrix();
         mesh.matrixAutoUpdate = false;
         scene.add( mesh );
 
 }
+
+box = new THREE.Mesh( geometry, material );
+box.position.y = 2
+group  = new THREE.Group()
+group.add(box)
+scene.add(group)
+
+
+
 // floor--------------------------
 const floorGeometry = new THREE.PlaneGeometry( 500, 500 );
 const floorMaterial = new THREE.MeshStandardMaterial( {
@@ -72,9 +81,10 @@ scene.add(grid)
 
   
   camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  camera.position.set(180, 2, 250);
+  camera.position.set(0, 5, 5);
+  camera.rotation.x = -0.3
 //   camera.lookAt(160, 0, 20)
-  scene.add(camera)
+  group.add(camera)
   
   const ambient = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
   scene.add(ambient);
@@ -84,7 +94,7 @@ scene.add(grid)
   light.rotation.y = 1;
   scene.add(light);
   
-renderer = new THREE.WebGLRenderer();
+renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
@@ -105,20 +115,14 @@ function update(){
     const dt = clock.getDelta();
     // camera.position.x += joy.get().x/5
     // camera.position.z += joy.get().y/5
-    distance += +joy.get().y
+    //distance += +joy.get().y
 
-    camera.position.x += Math.sin(camera.rotation.y) * +joy.get().y/2;
-    camera.position.z += Math.cos(camera.rotation.y) * +joy.get().y/2;
+    // group.translateX += 0.05
+     //group.rotation.x += 0.01
 
-    camera.position.x += Math.sin(camera.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
-    camera.position.z += Math.cos(camera.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
     
-    camera.rotation.y -= +joy.get().x/200;
-    //camera.rotation.y -= +joyLeft.get().x/100;
-    camera.position.y -= +joyLeft.get().y/5;
-
-    //-------------------------------------------------------------------------Test
-
+  objControll()
+  //cameraControll()
 
     // forwardVector.multiplyScalar(2)
 
@@ -142,6 +146,39 @@ function update(){
     // console.log(distance)
     // console.log(forwardVector)
     // }
+  }
+
+  function objControll(){
+    group.position.x += Math.sin(group.rotation.y) * + joy.get().y/2;
+    group.position.z += Math.cos(group.rotation.y) * + joy.get().y/2;
+
+    group.position.x += Math.sin(group.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
+    group.position.z += Math.cos(group.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
+
+    group.rotation.y -= +joy.get().x/200;
+
+
+
+    group.children[0].rotation.x = joy.get().y/3
+
+    group.children[0].rotation.y = +joy.get().x/4*-1
+    group.children[0].rotation.z = +joy.get().x/5*-1
+    //console.log(group.children)
+
+
+  }
+
+  function cameraControll(){
+    camera.position.x += Math.sin(camera.rotation.y) * +joy.get().y/2;
+    camera.position.z += Math.cos(camera.rotation.y) * +joy.get().y/2;
+
+    camera.position.x += Math.sin(camera.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
+    camera.position.z += Math.cos(camera.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
+    
+    camera.rotation.y -= +joy.get().x/200;
+    //camera.rotation.y -= +joyLeft.get().x/100;
+    camera.position.y -= +joyLeft.get().y/5;
+
   }
   
   function resize(){
