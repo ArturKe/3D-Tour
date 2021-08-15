@@ -1,117 +1,192 @@
 console.log('Hello')
 let scene, renderer, cameras, camera, helper, axisVector, startVector, targetVector, distance = 0, angle = 0, group, box;
+const assetPath = './assets/';
 
 const joyLeft = new Joystick('body',{ left: 20, bottom: 20})
 const joy = new Joystick('body',{ right: 20, bottom: 20})
 
-
-
-
-// let forwardVector = new THREE.Vector3(0,0,1)
-
-
+//let a = new THREE.GLTFLoader()
 init();
 
+
 function init(){
-scene = new THREE.Scene();
-scene.background = new THREE.Color(0x00aaff);
   
-const width = window.innerWidth;
-const height = window.innerHeight;
-const aspect = width/height;
-clock = new THREE.Clock();
+  sceneInit()
+  geometryInit()
+  flightObject()
+
+ 
 
 
-//--------------------------------------------------------------Vectors
-forwardVector = new THREE.Vector3(0,0,1)
-axisVector = new THREE.Vector3(0,1,0)
-startVector = new THREE.Vector3(0,0,0)
-targetVector = new THREE.Vector3(0,0,0)
-// let angle = Math.PI/2
+  // const controls = new THREE.OrbitControls( camera, renderer.domElement );
+  // controls.target.set(1,2,0);
+  // controls.update();
 
-// axisVector.set(0,1,0)
-// forwardVector.applyAxisAngle(axisVector, 1)
-// forwardVector.rotateOnAxis(axisVector, 1.5)
-console.log(forwardVector)
+  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  document.body.appendChild( renderer.domElement );
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-geometry.translate( 0, 0.5, 0 );
-const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
+  window.addEventListener( 'resize', resize, false);
+    
+  update()
+}
 
-for ( let i = 0; i < 500; i ++ ) {
 
-        const mesh = new THREE.Mesh( geometry, material );
-        mesh.position.x = Math.random() * 400-200;
-        mesh.position.y = 0;
-        mesh.position.z = Math.random() * 400-200;
-        mesh.scale.x = Math.random() * 10 + 2;
-        mesh.scale.y = Math.random() * 2 + 0.1;
-        mesh.scale.z = Math.random() * 5 + 3;
-        mesh.updateMatrix();
-        mesh.matrixAutoUpdate = false;
-        scene.add( mesh );
+function flightObject(){
+  //-----------------flight Cube ----------------------//
+  const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+  const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
+  geometry.translate( 0, 0.5, 0 );
+
+  box = new THREE.Mesh( geometry, material );
+  box.position.y = 2
+  group  = new THREE.Group()
+  //group.add(box)
+  scene.add(group)
+
+
+  camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  camera.position.set(0, 2.8, 5);
+  camera.rotation.x = -0.35
+  //   camera.lookAt(160, 0, 20)
+  group.add(camera)
+
+  fileLoader('ufo_edit_fudailshajahan.glb', 0.6)  //Загрузка тарелки
 
 }
 
-box = new THREE.Mesh( geometry, material );
-box.position.y = 2
-group  = new THREE.Group()
-group.add(box)
-scene.add(group)
+function sceneInit() { //-----------------------------------------------------------------Scene Init -------------------------------//
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x00aaff);
+    
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const aspect = width/height;
+  clock = new THREE.Clock();
 
 
-
-// floor--------------------------
-const floorGeometry = new THREE.PlaneGeometry( 500, 500 );
-const floorMaterial = new THREE.MeshStandardMaterial( {
-    color: 0xeeeeee,
-    roughness: 1.0,
-    metalness: 0.0
-} );
-const floor = new THREE.Mesh( floorGeometry, floorMaterial );
-floor.rotation.x = - Math.PI / 2;
-floor.receiveShadow = true;
-scene.add( floor );
-floor.position.y = -0.6;
-
-//Grid
-const grid = new THREE.GridHelper(500,100)
-scene.add(grid)
-// grid.position.y = -0.6
-
-  
-  camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  camera.position.set(0, 5, 5);
-  camera.rotation.x = -0.3
-//   camera.lookAt(160, 0, 20)
-  group.add(camera)
-  
+  //----------------------- Lights -----------------------//
   const ambient = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
   scene.add(ambient);
-  
+
   const light = new THREE.DirectionalLight(0xFFFFFF, 2);
   light.position.set( 0, 1, 10);
   light.rotation.y = 1;
   scene.add(light);
   
-renderer = new THREE.WebGLRenderer({antialias: true});
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+}
 
-// const controls = new THREE.OrbitControls( camera, renderer.domElement );
-// controls.target.set(1,2,0);
-// controls.update();
+function geometryInit() {
+  const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+  geometry.translate( 0, 0.5, 0 );
+  const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
 
-  window.addEventListener( 'resize', resize, false);
+  for ( let i = 0; i < 500; i ++ ) {
+    const mesh = new THREE.Mesh( geometry, material );
+    mesh.position.x = Math.random() * 400-200;
+    mesh.position.y = 0;
+    mesh.position.z = Math.random() * 400-200;
+    mesh.scale.x = Math.random() * 10 + 2;
+    mesh.scale.y = Math.random() * 2 + 0.1;
+    mesh.scale.z = Math.random() * 5 + 3;
+    mesh.updateMatrix();
+    mesh.matrixAutoUpdate = false;
+    scene.add( mesh );
+
+  }
+
+  //--------------------------- Floor--------------------------//
+  const floorGeometry = new THREE.PlaneGeometry( 500, 500 );
+  const floorMaterial = new THREE.MeshStandardMaterial( {
+      color: 0xeeeeee,
+      roughness: 1.0,
+      metalness: 0.0
+  } );
+  const floor = new THREE.Mesh( floorGeometry, floorMaterial );
+  floor.rotation.x = - Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add( floor );
+  floor.position.y = -0.6;
+
+  //----------------Grid
+  const grid = new THREE.GridHelper(500,100)
+  scene.add(grid)
+  // grid.position.y = -0.6
+
+}
+
+
+
+function fileLoader(fileName,objScale){
+  let venus;
+  const loader = new THREE.GLTFLoader();
+  loader.setPath(assetPath);
+
+  loader.load(fileName, function(object){
+      object.scene.traverse(function(child){
+          if (child.isMesh){  
+            child.castShadow = true;
+          //   child.receiveShadow = true;
+          }
+        })
+      
+  venus = object.scene;
   
-  update()
+  //-----------------------------------------------------------------------------//
+  const spotLight = new THREE.SpotLight( 0xffffff, 1 );
+  spotLight.angle = Math.PI / 8;
+  spotLight.penumbra = 0.5;
+  spotLight.decay = 2;
+  spotLight.rotation.x = Math.PI/2
+
+  const targetObject = new THREE.Object3D();
+  targetObject.position.y = -1;
+  venus.add(targetObject);
+
+  spotLight.target = targetObject;
+
+  venus.add(spotLight)
+  //----------------------------------------------------------------------//
+  const geometry = new THREE.ConeGeometry( 2, 5, 32 );
+  // const material = new THREEx.VolumetricSpotLightMaterial();
+  // material.uniforms.lightColor.value.set('white')
+	// material.uniforms.spotPosition.value	= mesh.position
+
+  const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+  material.transparent = true
+  material.opacity = 0.1
+  const cone = new THREE.Mesh( geometry, material );
+  cone.position.y = -2
+  venus.add( cone );
+
+  //---------------------------------------
+
+
+  group.add(venus);
+  venus.scale.set(objScale, objScale, objScale)
+  venus.position.y = 2
+  
+  });
+
+}
+
+function cubeTextureInit() {
+  const reflectionCube = new THREE.CubeTextureLoader()
+					.setPath( 'textures/cube/SwedishRoyalCastle/' )
+					.load( [ 'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg' ] );
+				reflectionCube.encoding = THREE.sRGBEncoding;
+
+				scene = new THREE.Scene();
+				scene.background = reflectionCube;
+  
 }
 
 
 
 function update(){
     requestAnimationFrame( update );
-      renderer.render( scene, camera );
+    renderer.render( scene, camera );
     const dt = clock.getDelta();
     // camera.position.x += joy.get().x/5
     // camera.position.z += joy.get().y/5
@@ -137,15 +212,7 @@ function update(){
     // axisVector.y += joy.get().y/2
     // camera.lookAt(axisVector)
 
-
-   
     // camera.rotation.y += joy.get().x/100
-   
-    // if(joy.get().x > 0 ){
-    // //     console.log(camera.position)
-    // console.log(distance)
-    // console.log(forwardVector)
-    // }
   }
 
   function objControll(){
@@ -159,10 +226,12 @@ function update(){
 
 
 
-    group.children[0].rotation.x = joy.get().y/3
+    group.children[1].rotation.x = joy.get().y/3  // Наклон вперед
 
-    group.children[0].rotation.y = +joy.get().x/4*-1
-    group.children[0].rotation.z = +joy.get().x/5*-1
+    group.children[1].rotation.y = +joy.get().x/4*-1
+    group.children[1].rotation.z = +joy.get().x/5*-1 + +joyLeft.get().x/5*-1 //Наклон в бок
+
+    //group.children[0].rotation.z = +joyLeft.get().x/5*-1
     //console.log(group.children)
 
 
