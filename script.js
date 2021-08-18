@@ -22,7 +22,7 @@ function init(){
   flightObject()
 
   cowLoader('cow_edit_ver1.glb',0.1,50)
-  cowLoader('pine_tree_ver2.glb',0.5,400)
+  cowLoader('pine_tree_ver2.glb',0.5,500,100)
 
 
  
@@ -99,6 +99,7 @@ function flightObject(){
 function sceneInit() { //-----------------------------------------------------------------Scene Init -------------------------------//
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x00aaff);
+  scene.fog = new THREE.FogExp2(0x00aaff, 0.01);
     
   const width = window.innerWidth;
   const height = window.innerHeight;
