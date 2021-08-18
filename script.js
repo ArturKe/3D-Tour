@@ -1,9 +1,13 @@
 console.log('Hello')
-let scene, renderer, cameras, camera, helper, axisVector, startVector, targetVector, distance = 0, angle = 0, group, box;
+let scene, renderer, cameras, camera, helper, axisVector, startVector, targetVector, distance = 0, angle = 0, group, box, ufoobject;
 const assetPath = './assets/';
 
 const joyLeft = new Joystick('body',{ left: 20, bottom: 20})
 const joy = new Joystick('body',{ right: 20, bottom: 20})
+const raycaster = new THREE.Raycaster();
+raycaster.origin = new THREE.Vector3(5, 5, 0)
+raycaster.direction = new THREE.Vector3(0, -1, 0)
+raycaster.far = 5
 
 //let a = new THREE.GLTFLoader()
 init();
@@ -13,10 +17,16 @@ function init(){
   
   sceneInit()
   geometryInit()
+  cubesInit()
+
   flightObject()
 
- 
+  cowLoader('cow_edit_ver1.glb',0.1,50)
+  cowLoader('pine_tree_ver2.glb',0.5,400)
 
+
+ 
+  
 
   // const controls = new THREE.OrbitControls( camera, renderer.domElement );
   // controls.target.set(1,2,0);
@@ -30,6 +40,24 @@ function init(){
   window.addEventListener( 'resize', resize, false);
     
   update()
+}
+
+function ray(){
+  const raycaster = new THREE.Raycaster();
+}
+
+function rayUpdate(){
+  const intersects = raycaster.intersectObjects( scene.children );
+
+	// for ( let i = 0; i < intersects.length; i ++ ) {
+
+	// 	//intersects[ i ].object.material.color.set( 0xff0000 );
+  //   console.log(intersects[ i ])
+
+	// }
+
+  
+  console.log(intersects);
 }
 
 
@@ -52,9 +80,21 @@ function flightObject(){
   //   camera.lookAt(160, 0, 20)
   group.add(camera)
 
-  fileLoader('ufo_edit_fudailshajahan.glb', 0.6)  //Загрузка тарелки
+  //fileLoader('ufo_edit_fudailshajahan.glb', 0.6)  //Загрузка тарелки
+
+  fileLoader('ufo_edit_fudailshajahan.glb', 0.6)
+ 
+  setTimeout(()=>{ 
+    console.log(ufoobject)
+    console.log(scene.children)
+  
+  },3000)
+  
+
 
 }
+
+
 
 function sceneInit() { //-----------------------------------------------------------------Scene Init -------------------------------//
   scene = new THREE.Scene();
@@ -77,7 +117,8 @@ function sceneInit() { //-------------------------------------------------------
   
 }
 
-function geometryInit() {
+
+function cubesInit(){
   const geometry = new THREE.BoxGeometry( 1, 1, 1 );
   geometry.translate( 0, 0.5, 0 );
   const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
@@ -87,15 +128,19 @@ function geometryInit() {
     mesh.position.x = Math.random() * 400-200;
     mesh.position.y = 0;
     mesh.position.z = Math.random() * 400-200;
-    mesh.scale.x = Math.random() * 10 + 2;
-    mesh.scale.y = Math.random() * 2 + 0.1;
-    mesh.scale.z = Math.random() * 5 + 3;
+    mesh.scale.x = Math.random() * 4 + 2;
+    mesh.scale.y = Math.random() * 1.5 + 0.1;
+    mesh.scale.z = Math.random() * 3 + 1;
     mesh.updateMatrix();
     mesh.matrixAutoUpdate = false;
     scene.add( mesh );
 
   }
 
+}
+
+function geometryInit() {
+ 
   //--------------------------- Floor--------------------------//
   const floorGeometry = new THREE.PlaneGeometry( 500, 500 );
   const floorMaterial = new THREE.MeshStandardMaterial( {
@@ -118,7 +163,7 @@ function geometryInit() {
 
 
 
-function fileLoader(fileName,objScale){
+async function fileLoader(fileName,objScale){
   let venus;
   const loader = new THREE.GLTFLoader();
   loader.setPath(assetPath);
@@ -160,16 +205,69 @@ function fileLoader(fileName,objScale){
   cone.position.y = -2
   venus.add( cone );
 
-  //---------------------------------------
-
+  //-------------------------------------------------------------------//
+ 
 
   group.add(venus);
   venus.scale.set(objScale, objScale, objScale)
   venus.position.y = 2
+
+  ufoobject = venus
+
+  console.log( 'Venus ' + venus)
+  console.log(venus)
   
-  });
+  
+  }, function(xhr){console.log((xhr.loaded/xhr.total*100)+'% loaded')});
+  
 
 }
+
+
+
+async function cowLoader(fileName,objScale,count=1,area=100){
+  let cow;
+  const loader = new THREE.GLTFLoader();
+  loader.setPath(assetPath);
+
+  loader.load(fileName, function(object){
+      object.scene.traverse(function(child){
+          if (child.isMesh){  
+            child.castShadow = true;
+          //   child.receiveShadow = true;
+          }
+        })
+
+        
+        cow = object.scene;
+        cow.scale.set(objScale, objScale, objScale)
+  
+        for ( let i = 0; i < count; i ++ ) {
+          const mesh = cow.clone();
+      
+          mesh.position.x = Math.random() * area-area/2;
+          // mesh.position.y = 0;
+          mesh.position.z = Math.random() * area-area/2;
+
+          // mesh.scale.x = Math.random() * 10 + 2;
+          // mesh.scale.y = Math.random() * 2 + 0.1;
+          // mesh.scale.z = Math.random() * 5 + 3;
+
+          mesh.rotation.y = Math.random() * 3;
+          scene.add(mesh);
+      
+      
+        }
+
+        //scene.add(cow);
+
+
+
+  }, function(xhr){console.log((xhr.loaded/xhr.total*100)+'% loaded')});
+  
+
+}
+
 
 function cubeTextureInit() {
   const reflectionCube = new THREE.CubeTextureLoader()
@@ -213,6 +311,8 @@ function update(){
     // camera.lookAt(axisVector)
 
     // camera.rotation.y += joy.get().x/100
+
+    //rayUpdate()
   }
 
   function objControll(){
