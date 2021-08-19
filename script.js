@@ -17,16 +17,15 @@ function init(){
   
   sceneInit()
   geometryInit()
-  cubesInit()
+  // cubesInit()
 
   flightObject()
 
-  cowLoader('cow_edit_ver1.glb',0.1,50)
-  cowLoader('pine_tree_ver2.glb',0.5,500,100)
-
-
- 
   
+  treesLoader({fileName:'pine_tree_ver2.glb', count: 800, scale: 0.5, scaleDivider: 2, area: 150})
+  treesLoader({fileName:'cow_edit_ver1.glb', count: 60, scale: 0.1})
+  treesLoader({fileName:'farm_house_ver1.glb', count: 100, scale: 2.3, area: 200})
+
 
   // const controls = new THREE.OrbitControls( camera, renderer.domElement );
   // controls.target.set(1,2,0);
@@ -108,8 +107,15 @@ function sceneInit() { //-------------------------------------------------------
 
 
   //----------------------- Lights -----------------------//
+  
   const ambient = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
   scene.add(ambient);
+
+  // const hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.7 );
+	// 			hemiLight.color.setHSL( 0.6, 1, 0.6 );
+	// 			hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+	// 			hemiLight.position.set( 0, 50, 0 );
+	// 			scene.add( hemiLight );
 
   const light = new THREE.DirectionalLight(0xFFFFFF, 2);
   light.position.set( 0, 1, 10);
@@ -179,7 +185,7 @@ async function fileLoader(fileName,objScale){
       
   venus = object.scene;
   
-  //-----------------------------------------------------------------------------//
+  //----------------------------------------------------------Main Spot Light-------------------//
   const spotLight = new THREE.SpotLight( 0xffffff, 1 );
   spotLight.angle = Math.PI / 8;
   spotLight.penumbra = 0.5;
@@ -193,7 +199,7 @@ async function fileLoader(fileName,objScale){
   spotLight.target = targetObject;
 
   venus.add(spotLight)
-  //----------------------------------------------------------------------//
+  //----------------------------------------------------------CONE------------//
   const geometry = new THREE.ConeGeometry( 2, 5, 32 );
   // const material = new THREEx.VolumetricSpotLightMaterial();
   // material.uniforms.lightColor.value.set('white')
@@ -206,8 +212,12 @@ async function fileLoader(fileName,objScale){
   cone.position.y = -2
   venus.add( cone );
 
-  //-------------------------------------------------------------------//
- 
+  //--------------------------------------------------Point Light-----------------//
+
+  const pLight = new THREE.PointLight( 0xaa0000, 2, 20 );
+  pLight.position.set( 0, -1, 0 );
+  venus.add( pLight );
+ //------------------------------------------------------------------------------//
 
   group.add(venus);
   venus.scale.set(objScale, objScale, objScale)
@@ -226,12 +236,15 @@ async function fileLoader(fileName,objScale){
 
 
 
-async function cowLoader(fileName,objScale,count=1,area=100){
-  let cow;
+async function treesLoader(params){
+  const defaultParams = {fileName:'', scale: 1 , scaleDivider: 1, count: 1, area: 100}
+  params = {...defaultParams, ...params}
+
+  let obj;
   const loader = new THREE.GLTFLoader();
   loader.setPath(assetPath);
 
-  loader.load(fileName, function(object){
+  loader.load(params.fileName, function(object){
       object.scene.traverse(function(child){
           if (child.isMesh){  
             child.castShadow = true;
@@ -240,15 +253,21 @@ async function cowLoader(fileName,objScale,count=1,area=100){
         })
 
         
-        cow = object.scene;
-        cow.scale.set(objScale, objScale, objScale)
-  
-        for ( let i = 0; i < count; i ++ ) {
-          const mesh = cow.clone();
+        obj = object.scene;
+        obj.scale.set(params.scale, params.scale, params.scale)
+       
+       
+        for ( let i = 0; i < params.count; i ++ ) {
+          const mesh = obj.clone();
       
-          mesh.position.x = Math.random() * area-area/2;
+          mesh.position.x = Math.random() * params.area-params.area/2;
           // mesh.position.y = 0;
-          mesh.position.z = Math.random() * area-area/2;
+          mesh.position.z = Math.random() * params.area-params.area/2;
+
+          if (params.scaleDivider > 1){
+            let itemScale =Math.random() * params.scale + params.scale/params.scaleDivider;
+            mesh.scale.set(itemScale,itemScale,itemScale)
+          }
 
           // mesh.scale.x = Math.random() * 10 + 2;
           // mesh.scale.y = Math.random() * 2 + 0.1;
@@ -259,10 +278,6 @@ async function cowLoader(fileName,objScale,count=1,area=100){
       
       
         }
-
-        //scene.add(cow);
-
-
 
   }, function(xhr){console.log((xhr.loaded/xhr.total*100)+'% loaded')});
   
