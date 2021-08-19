@@ -18,13 +18,14 @@ function init(){
   sceneInit()
   geometryInit()
   // cubesInit()
+  cubesRoundInit()
 
   flightObject()
 
   
-  treesLoader({fileName:'pine_tree_ver2.glb', count: 800, scale: 0.5, scaleDivider: 2, area: 150})
-  treesLoader({fileName:'cow_edit_ver1.glb', count: 60, scale: 0.1})
-  treesLoader({fileName:'farm_house_ver1.glb', count: 100, scale: 2.3, area: 200})
+  treesLoader({fileName:'pine_tree_double_ver1.glb', count: 800, scale: 0.5, scaleDivider: 2, area: 150})
+  treesLoader({fileName:'cow_edit_ver1.glb', count: 60, scale: 0.08})
+  treesLoader({fileName:'farm_house_ver1.glb', count: 50, scale: 2.3, area: 200})
 
 
   // const controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -121,6 +122,8 @@ function sceneInit() { //-------------------------------------------------------
   light.position.set( 0, 1, 10);
   light.rotation.y = 1;
   scene.add(light);
+
+  cubeTextureInit()
   
 }
 
@@ -137,6 +140,33 @@ function cubesInit(){
     mesh.position.z = Math.random() * 400-200;
     mesh.scale.x = Math.random() * 4 + 2;
     mesh.scale.y = Math.random() * 1.5 + 0.1;
+    mesh.scale.z = Math.random() * 3 + 1;
+    mesh.updateMatrix();
+    mesh.matrixAutoUpdate = false;
+    scene.add( mesh );
+
+  }
+
+}
+
+function cubesRoundInit(){
+  const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+  geometry.translate( 0, 0.5, 0 );
+  const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
+
+  for ( let i = 0; i < 500; i ++ ) {
+    const mesh = new THREE.Mesh( geometry, material );
+
+    let length = Math.random() * 150+110;
+    let angle = Math.random() * (2*Math.PI)
+
+    mesh.position.x = length * Math.sin(angle)
+    mesh.position.y = 0;
+    mesh.position.z =length * Math.cos(angle)
+
+
+    mesh.scale.x = Math.random() * 5 + 2;
+    mesh.scale.y = Math.random() * 3 + 0.5;
     mesh.scale.z = Math.random() * 3 + 1;
     mesh.updateMatrix();
     mesh.matrixAutoUpdate = false;
@@ -214,9 +244,9 @@ async function fileLoader(fileName,objScale){
 
   //--------------------------------------------------Point Light-----------------//
 
-  const pLight = new THREE.PointLight( 0xaa0000, 2, 20 );
-  pLight.position.set( 0, -1, 0 );
-  venus.add( pLight );
+  // const pLight = new THREE.PointLight( 0xaa0000, 2, 20 );
+  // pLight.position.set( 0, -1, 0 );
+  // venus.add( pLight );
  //------------------------------------------------------------------------------//
 
   group.add(venus);
@@ -287,12 +317,12 @@ async function treesLoader(params){
 
 function cubeTextureInit() {
   const reflectionCube = new THREE.CubeTextureLoader()
-					.setPath( 'textures/cube/SwedishRoyalCastle/' )
+					.setPath( './assets/textures/cube/' )
 					.load( [ 'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg' ] );
 				reflectionCube.encoding = THREE.sRGBEncoding;
 
-				scene = new THREE.Scene();
-				scene.background = reflectionCube;
+				// scene = new THREE.Scene();
+				//scene.background = reflectionCube;
   
 }
 
