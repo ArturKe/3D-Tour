@@ -6,8 +6,8 @@ class InfoPanel{
         this.classInfoPanel = this.generateClassName("info-panel")
         this.classInfoBody = this.generateClassName("info-panel__body")
 
-        this.styleInfoPanel =`style="display:block; position:absolute; padding: 0 10px; top:20px; left:20px; height: ${this.height}px; min-width: ${this.width}px;  display: flex; justify-content: center; align-items: center; border: 2px white solid; border-radius: 10px; background-color: rgba(1,1,1,0.4)"`
-        this.styleInfoBody =`style="font-size: 30px; color: white"`
+        this.styleInfoPanel =`style="display:block; position:absolute; padding: 0 10px; top:15px; left:20px; height: ${this.height}px; min-width: ${this.width}px;  display: flex; justify-content: center; align-items: center; border: 2px white solid; border-radius: 10px; background-color: rgba(1,1,1,0.4)"`
+        this.styleInfoBody =`style="font-size: 25px; color: white"`
         this.counter = 0
         this.maxCount = maxCount
 

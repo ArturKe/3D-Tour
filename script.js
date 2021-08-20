@@ -18,10 +18,28 @@ let rayDirection = new THREE.Vector3(0, -1, 0)
 raycaster.set(rayOrigin, rayDirection)
 raycaster.far = 20
 
+// const listener = new THREE.AudioListener();
+// const sound1 = new THREE.Audio( listener );
+// const songElement = document.getElementById( 'song1' );
+// sound1.setMediaElementSource( songElement );
+//sound1.setRefDistance( 20 );
 
-  
 
-//let a = new THREE.GLTFLoader()
+const listener = new THREE.AudioListener();
+
+
+// create a global audio source
+const sound = new THREE.Audio( listener );
+
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load( './assets/sounds/bubble-shot.ogg', function( buffer ) {
+	sound.setBuffer( buffer );
+	//sound.setLoop( true );
+	sound.setVolume( 0.5 );
+	//sound.play();
+});
+
 init();
 
 
@@ -30,7 +48,7 @@ function init(){
   sceneInit()
   geometryInit()
 
-  rayInit()
+  rayInit()  //-ArrowInit
 
   // cubesInit()
   cubesRoundInit()
@@ -58,15 +76,12 @@ function init(){
 }
 
 function rayInit(){
-  
 
   arrowHelper = new THREE.ArrowHelper(
       new THREE.Vector3(),
       new THREE.Vector3(),
-      1,
+      0.5,
       0xffff00)
-
-
   scene.add(arrowHelper)
 }
 
@@ -74,18 +89,16 @@ function rayUpdate(){
   const intersects = raycaster.intersectObjects( sceneMeshes );
 
 	for ( let i = 0; i < intersects.length; i ++ ) {
-    // let color = new THREE.Color()
-    // color.set(Math.random()*100+20,Math.random()*100+10,Math.random()*100+1)
+    
     if(!catchedObjects.includes(intersects[ 0 ].object)){
 
       intersects[ 0 ].object.material.color.set('red');
 
       let scale = 2
       intersects[ 0 ].object.scale.set(scale, scale, scale)
-      
    
-      console.log(intersects[ 0 ])
-      console.log(sceneMeshes.includes(intersects[ 0 ].object))
+      // console.log(intersects[ 0 ])
+      // console.log(sceneMeshes.includes(intersects[ 0 ].object))
 
       //sceneMeshes.filter(obj => obj === intersects[ 0 ].object)
       // sceneMeshes.filter(obj => console.log(obj))
@@ -97,6 +110,8 @@ function rayUpdate(){
       catchedObjects.push(intersects[ 0 ].object)
       infoP.increase()
 
+      sound.play();
+
       console.log(catchedObjects)
 
     }
@@ -105,7 +120,11 @@ function rayUpdate(){
     //console.log(group.children[1].children[3].geometry.parameters) //- cone
     //group.children[1].children[3].radius = 5
 
+    const n = new THREE.Vector3()
+    n.copy((intersects[0].face).normal)
+    n.transformDirection(intersects[0].object.matrixWorld)
 
+    arrowHelper.setDirection(n)
     arrowHelper.position.copy(intersects[ 0 ].point)
 
  }
@@ -131,6 +150,9 @@ function flightObject(){
   camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
   camera.position.set(0, 2.8, 5);
   camera.rotation.x = -0.35
+
+  camera.add( listener );
+
   //   camera.lookAt(160, 0, 20)
   group.add(camera)
 
@@ -432,7 +454,8 @@ function update(){
     rayUpdate()
   }
 
-  function objControll(){
+  function objControll(area = 200){
+    // if(group.position.x >== area && (group.position.x >== area)){}
     group.position.x += Math.sin(group.rotation.y) * + joy.get().y/4;
     group.position.z += Math.cos(group.rotation.y) * + joy.get().y/4;
 
@@ -447,6 +470,8 @@ function update(){
 
     group.children[1].rotation.y = +joy.get().x/4*-1
     group.children[1].rotation.z = +joy.get().x/5*-1 + +joyLeft.get().x/5*-1 //Наклон в бок
+
+    
 
     //group.children[0].rotation.z = +joyLeft.get().x/5*-1
     //console.log(group.children)
