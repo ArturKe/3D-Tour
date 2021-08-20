@@ -1,13 +1,25 @@
 console.log('Hello')
-let scene, renderer, cameras, camera, helper, axisVector, startVector, targetVector, distance = 0, angle = 0, group, box, ufoobject;
+let scene, renderer, cameras, camera, helper, axisVector, startVector, targetVector, distance = 0, angle = 0, group, box, ufoobject, arrowHelper;
 const assetPath = './assets/';
+const sceneMeshes = []
+const catchedObjects = []
+let cowCount = 60
 
+const infoP = new InfoPanel('body', cowCount)
 const joyLeft = new Joystick('body',{ left: 20, bottom: 20})
 const joy = new Joystick('body',{ right: 20, bottom: 20})
+
+
+
 const raycaster = new THREE.Raycaster();
-raycaster.origin = new THREE.Vector3(5, 5, 0)
-raycaster.direction = new THREE.Vector3(0, -1, 0)
-raycaster.far = 5
+
+let rayOrigin = new THREE.Vector3(0, 1, 0)
+let rayDirection = new THREE.Vector3(0, -1, 0)
+raycaster.set(rayOrigin, rayDirection)
+raycaster.far = 20
+
+
+  
 
 //let a = new THREE.GLTFLoader()
 init();
@@ -17,6 +29,9 @@ function init(){
   
   sceneInit()
   geometryInit()
+
+  rayInit()
+
   // cubesInit()
   cubesRoundInit()
 
@@ -24,7 +39,7 @@ function init(){
 
   
   treesLoader({fileName:'pine_tree_double_ver1.glb', count: 800, scale: 0.5, scaleDivider: 2, area: 150})
-  treesLoader({fileName:'cow_edit_ver1.glb', count: 60, scale: 0.08})
+  treesLoader({fileName:'cow_edit_ver1.glb', count: cowCount, scale: 0.1})
   treesLoader({fileName:'farm_house_ver1.glb', count: 50, scale: 2.3, area: 200})
 
 
@@ -42,22 +57,61 @@ function init(){
   update()
 }
 
-function ray(){
-  const raycaster = new THREE.Raycaster();
+function rayInit(){
+  
+
+  arrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(),
+      new THREE.Vector3(),
+      1,
+      0xffff00)
+
+
+  scene.add(arrowHelper)
 }
 
 function rayUpdate(){
-  const intersects = raycaster.intersectObjects( scene.children );
+  const intersects = raycaster.intersectObjects( sceneMeshes );
 
-	// for ( let i = 0; i < intersects.length; i ++ ) {
+	for ( let i = 0; i < intersects.length; i ++ ) {
+    // let color = new THREE.Color()
+    // color.set(Math.random()*100+20,Math.random()*100+10,Math.random()*100+1)
+    if(!catchedObjects.includes(intersects[ 0 ].object)){
 
-	// 	//intersects[ i ].object.material.color.set( 0xff0000 );
-  //   console.log(intersects[ i ])
+      intersects[ 0 ].object.material.color.set('red');
 
-	// }
+      let scale = 2
+      intersects[ 0 ].object.scale.set(scale, scale, scale)
+      
+   
+      console.log(intersects[ 0 ])
+      console.log(sceneMeshes.includes(intersects[ 0 ].object))
+
+      //sceneMeshes.filter(obj => obj === intersects[ 0 ].object)
+      // sceneMeshes.filter(obj => console.log(obj))
+      // console.log(sceneMeshes)
+
+      // console.log(group.children[1].children[2])  //-SpotLight
+      // group.children[1].children[2].angle = 0.3
+
+      catchedObjects.push(intersects[ 0 ].object)
+      infoP.increase()
+
+      console.log(catchedObjects)
+
+    }
+
+	  
+    //console.log(group.children[1].children[3].geometry.parameters) //- cone
+    //group.children[1].children[3].radius = 5
+
+
+    arrowHelper.position.copy(intersects[ 0 ].point)
+
+ }
 
   
-  console.log(intersects);
+  // console.log(intersects);
 }
 
 
@@ -152,9 +206,10 @@ function cubesInit(){
 function cubesRoundInit(){
   const geometry = new THREE.BoxGeometry( 1, 1, 1 );
   geometry.translate( 0, 0.5, 0 );
-  const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
+  // const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
 
   for ( let i = 0; i < 500; i ++ ) {
+    const material = new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
     const mesh = new THREE.Mesh( geometry, material );
 
     let length = Math.random() * 150+110;
@@ -194,7 +249,7 @@ function geometryInit() {
   //----------------Grid
   const grid = new THREE.GridHelper(500,100)
   scene.add(grid)
-  // grid.position.y = -0.6
+  grid.position.y = -0.6
 
 }
 
@@ -217,8 +272,8 @@ async function fileLoader(fileName,objScale){
   
   //----------------------------------------------------------Main Spot Light-------------------//
   const spotLight = new THREE.SpotLight( 0xffffff, 1 );
-  spotLight.angle = Math.PI / 8;
-  spotLight.penumbra = 0.5;
+  spotLight.angle = 0.16;
+  spotLight.penumbra = 0.7;
   spotLight.decay = 2;
   spotLight.rotation.x = Math.PI/2
 
@@ -230,7 +285,7 @@ async function fileLoader(fileName,objScale){
 
   venus.add(spotLight)
   //----------------------------------------------------------CONE------------//
-  const geometry = new THREE.ConeGeometry( 2, 5, 32 );
+  const geometry = new THREE.ConeGeometry( 1, 5, 32 );
   // const material = new THREEx.VolumetricSpotLightMaterial();
   // material.uniforms.lightColor.value.set('white')
 	// material.uniforms.spotPosition.value	= mesh.position
@@ -277,8 +332,14 @@ async function treesLoader(params){
   loader.load(params.fileName, function(object){
       object.scene.traverse(function(child){
           if (child.isMesh){  
-            child.castShadow = true;
-          //   child.receiveShadow = true;
+            const m = child
+            m.castShadow = true;
+            //m.receiveShadow = true;
+            //m.material.flatShading = true
+            // if(m.name === 'cow_simple') {
+            //   sceneMeshes.push(m)
+            // }
+            
           }
         })
 
@@ -304,10 +365,20 @@ async function treesLoader(params){
           // mesh.scale.z = Math.random() * 5 + 3;
 
           mesh.rotation.y = Math.random() * 3;
+          mesh.updateMatrix();
+
+          console.log(mesh.children[0].name)  // Добавление коров в массив, замена материала на индивидуальный
+          if(mesh.children[0].name === 'cow_simple') {
+              mesh.children[0].material =  new THREE.MeshPhongMaterial({color: new THREE.Color('grey')});
+              sceneMeshes.push(mesh.children[0])
+            }
+          
           scene.add(mesh);
-      
-      
         }
+
+        
+        console.log('sceneMeshes------------------------------')
+        console.log(sceneMeshes)
 
   }, function(xhr){console.log((xhr.loaded/xhr.total*100)+'% loaded')});
   
@@ -357,18 +428,18 @@ function update(){
     // camera.lookAt(axisVector)
 
     // camera.rotation.y += joy.get().x/100
-
-    //rayUpdate()
+   
+    rayUpdate()
   }
 
   function objControll(){
-    group.position.x += Math.sin(group.rotation.y) * + joy.get().y/2;
-    group.position.z += Math.cos(group.rotation.y) * + joy.get().y/2;
+    group.position.x += Math.sin(group.rotation.y) * + joy.get().y/4;
+    group.position.z += Math.cos(group.rotation.y) * + joy.get().y/4;
 
-    group.position.x += Math.sin(group.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
-    group.position.z += Math.cos(group.rotation.y + Math.PI / 2) * +joyLeft.get().x/2;
+    group.position.x += Math.sin(group.rotation.y + Math.PI / 2) * +joyLeft.get().x/4;
+    group.position.z += Math.cos(group.rotation.y + Math.PI / 2) * +joyLeft.get().x/4;
 
-    group.rotation.y -= +joy.get().x/200;
+    group.rotation.y -= +joy.get().x/100; // Разворот
 
 
 
@@ -379,6 +450,21 @@ function update(){
 
     //group.children[0].rotation.z = +joyLeft.get().x/5*-1
     //console.log(group.children)
+
+    
+
+
+    const n = new THREE.Vector3();
+    const origin = new THREE.Vector3();
+    n.copy(group.children[1].rotation);
+
+   
+    origin.set(group.position.x, 1.9, group.position.z)
+
+    //arrowHelper.setDirection(n);
+    //arrowHelper.position.copy(origin)
+    //arrowHelper.position.set(group.position)
+    raycaster.set(origin, rayDirection)
 
 
   }
