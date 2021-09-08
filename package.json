@@ -1,0 +1,16 @@
+{
+  "name": "testthree",
+  "version": "1.0.0",
+  "description": "Three js test project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "html-webpack-plugin": "^5.3.2",
+    "three": "^0.131.3",
+    "webpack": "^5.51.1"
+  }
+}
